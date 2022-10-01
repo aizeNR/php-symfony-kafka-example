@@ -1,0 +1,58 @@
+services:
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true
+
+  App\Kafka\SchemaRegistry\Handler\SchemaRegistryHandler: '@schema.registry.handler.http'
+
+  ## Schema Registry
+  schema.registry.handler.http:
+    class: App\Kafka\SchemaRegistry\Handler\HttpSchemaRegistryHandler
+
+  schema.registry.handler.cache:
+    class: App\Kafka\SchemaRegistry\Handler\CacheSchemaRegistryHandler
+    decoration_priority: 1
+    arguments:
+      - '@schema.registry.handler.cache.inner'
+    decorates: 'schema.registry.handler.http'
+  ## Schema Registry
+
+  ## Consumer
+  App\Kafka\Consumer\Context\ConsumerContextInterface: '@kafka.consumer.context.strategy'
+
+  kafka.consumer.context.strategy: '@App\Kafka\Consumer\Context\StrategyConsumerContext'
+
+  kafka.consumer.context.log:
+    class: App\Kafka\Consumer\Context\LogConsumerContext
+    decoration_priority: 1
+    arguments:
+      - '@kafka.consumer.context.log.inner'
+    decorates: 'kafka.consumer.context.strategy'
+
+  kafka.consumer.context.retry:
+    class: App\Kafka\Consumer\Context\RetryConsumerContext
+    decoration_priority: 2
+    arguments:
+      - '@kafka.consumer.context.retry.inner'
+    decorates: 'kafka.consumer.context.strategy'
+  ## Consumer
+
+  ## Producer
+  App\Kafka\Producer\Context\ProducerContextInterface: '@kafka.producer.context.strategy'
+
+  kafka.producer.context.strategy: '@App\Kafka\Producer\Context\StrategyProducerContext'
+
+  kafka.producer.context.log:
+    class: App\Kafka\Producer\Context\LogProducerContext
+    decoration_priority: 1
+    arguments:
+      - '@kafka.producer.context.log.inner'
+    decorates: 'kafka.producer.context.strategy'
+
+  kafka.producer.context.contract:
+    class: App\Kafka\Producer\Context\CheckProducerContractContext
+    decoration_priority: 2
+    arguments:
+      - '@kafka.producer.context.contract.inner'
+    decorates: 'kafka.producer.context.strategy'
+  ## Producer

@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  php-core:
+    build:
+      context: ./php
+    user: 1000:1000
+    environment:
+      - COMPOSER_HOME=/tmp/composer
+    volumes:
+      - ../src:/var/www/
+      - ~/.composer:/tmp/composer
+    networks:
+      - symfony
+
+networks:
+  symfony:
